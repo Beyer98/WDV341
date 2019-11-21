@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<title>WDV341 Intro PHP - Self Posting Form</title>
+
+<style>
+
+
+#orderArea	
+
+{
+
+	border:thin solid black;
+
+  padding:20px;
+
+  padding-top:0px;
+
+  margin-left:20px;
+
+  margin-right:20px;
+
+}
+
+
+#orderArea h3	
+
+{
+
+	text-align:center;
+
+  padding-bottom:20px;
+
+}
+
+.error	
+
+{
+
+	color:red;
+
+	font-style:italic;	
+
+}
+
+
+</style>
+
+
+<script>
+
+$(document).ready(function() {
+
+  $("textarea").keypress(function(event) {
+
+    if(event.which == '13') {
+
+      return false;
+
+    }
+
+  });
+
+});
+
+</script>
+
+
+<?php 
+
+
+  include("FormValidationClass.php");
+
+  $formValidations = new validations();
+
+
+  $customer_name="";
+
+  $customer_phone="";
+
+  $customer_email="";
+
+  $registration_select="";
+
+  $badgeHolder="";
+
+  $special_requests="";
+
+
+
+  if( isset($_POST['submit']) )
+
+	{
+
+    //ASSIGNMENTS
+
+    $customer_name=$_POST["customerName"];
+
+    $customer_phone=$_POST["customerPhone"];
+
+    $customer_email=$_POST["customerEmail"];
+
+
+    $registration_select=$_POST["registrationSelect"];
+
+
+    $special_requests=$_POST["specialRequests"];
+
+
+    //INDIVIDUAL VALIDATIONS
+
+    if($formValidations->validateName($customer_name))
+
+    {
+
+      $name_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $name_validation="bad";
+
+      echo "<div class='error'>Name is invalid</div>";
+
+    }
+
+
+    if($formValidations->validatePhone($customer_phone))
+
+    {
+
+      $phone_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $phone_validation="bad";
+
+      echo "<div class='error'>Phone number is invalid</div>";
+
+    }
+
+
+    if($formValidations->validateEmail($customer_email))
+
+    {
+
+      $email_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $email_validation="bad";
+
+      echo "<div class='error'>Email address is invalid</div>";
+
+    }
+
+
+    if($_POST['registrationSelect'] == "choose")
+
+    {
+
+      $registration_validation="bad";
+
+      echo "<div class='error'>You must select a registration option</div>";
+
+    }
+
+    else
+
+    {
+
+      $registration_validation="good";
+
+    }
+    
+
+    if (isset($_POST['badgeHolder']))
+
+    {
+
+      $badgeHolder = $_POST['badgeHolder'];
+
+      $badge_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $badge_validation="bad";
+
+      echo "<div class='error'>You must select a badge holder</div>";
+
+    }
+
+
+    if($formValidations->validateRequests($special_requests)||empty($special_requests))
+
+    {
+
+      $requests_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $requests_validation="bad";
+
+      echo "<div class='error'>Special requests are invalid</div>";
+
+    }
+
+
+    //VALIDATION CHECKER
+
+    if($name_validation=="good"&&$phone_validation=="good"&&$email_validation=="good"&&$requests_validation=="good"&&$registration_validation=="good"&&$badge_validation=="good")
+
+    {
+
+      //CONNECT TO DATABASE
+
+
+
+      //PREPARE SQL QUERY
+
+
+
+      //BIND FORM VALUES TO QUERY STATEMENT OBJECT
+
+
+
+      //INSERT SQL QUERY
+
+
+
+      //IF QUERY IS SUCCESSFUL
+
+        //SHOW CONFIRMATION
+
+
+
+      //ELSE
+
+        //THERE WAS AN ERROR, TRY AGAIN
+
+    }
+
+  }
+
+?>
+
+</head>
+
+
+<body>
+
+
+<h1>WDV341 Intro PHP</h1>
+
+<h2>Unit-5 and Unit-6 Self Posting - Form Validation Assignment</h2>
+
+<p>&nbsp;</p>
+
+
+<div id="orderArea">
+
+<form name="form3" method="post" action="">
+
+  <h3>Customer Registration Form</h3>
+
+
+      <p>
+
+        <label for="customerName">Name:</label>
+
+        <input type="text" name="customerName" value="<?php echo $customer_name; ?>">
+
+        <input type="text" name="customerName_" style="display:none;" value="<?php echo $customer_name; ?>">
+
+      </p>
+
+      <p>
+
+        <label for="customerPhone">Phone Number:</label>
+
+        <input type="text" name="customerPhone" value="<?php echo $customer_phone; ?>">
+
+        <input type="text" name="customerPhone_" style="display:none;" value="<?php echo $customer_phone; ?>">
+
+      </p>
+
+      <p>
+
+        <label for="customerEmail">Email Address: </label>
+
+        <input type="text" name="customerEmail" value="<?php echo $customer_email; ?>">
+
+        <input type="text" name="customerEmail_" style="display:none;" value="<?php echo $customer_email; ?>">
+
+      </p>
+
+
+      <p>
+
+        <label for="registrationSelect">Registration: </label>
+
+        <select name="registrationSelect">
+
+          <option value="choose">Choose Type</option>
+
+          <option value="attendee" <?php if($registration_select=='attendee'){echo "selected";} ?>>Attendee</option>
+
+          <option value="presenter" <?php if($registration_select=='presenter'){echo "selected";} ?>>Presenter</option>
+
+          <option value="volunteer" <?php if($registration_select=='volunteer'){echo "selected";} ?>>Volunteer</option>
+
+          <option value="guest" <?php if($registration_select=='guest'){echo "selected";} ?>>Guest</option>
+
+        </select>
+
+        <select name="registrationSelect_" style="display:none;">
+
+          <option value="choose_" style="display:none;">Choose Type</option>
+
+          <option value="attendee_" style="display:none;" <?php if($registration_select=='attendee'){echo "selected";} ?>>Attendee</option>
+
+          <option value="presenter_" style="display:none;" <?php if($registration_select=='presenter'){echo "selected";} ?>>Presenter</option>
+
+          <option value="volunteer_" style="display:none;" <?php if($registration_select=='volunteer'){echo "selected";} ?>>Volunteer</option>
+
+          <option value="guest_" style="display:none;" <?php if($registration_select=='guest'){echo "selected";} ?>>Guest</option>
+
+        </select>
+
+      </p>
+
+
+      <p>Badge Holder:</p>
+
+      <p>
+
+        <input type="radio" name="badgeHolder" value="clip"<?php if ($badgeHolder=="clip"){echo "checked";}?>>
+
+        <input type="radio" name="badgeHolder_" value="clip_" style="display:none;"<?php if (isset($_POST['badgeHolder_'])){echo "checked";}?>>
+
+        <label for="clip">Clip</label><br>
+
+
+        <input type="radio" name="badgeHolder" value="lanyard"<?php if ($badgeHolder=="lanyard"){echo "checked";}?>>
+
+        <input type="radio" name="badgeHolder_" value="lanyard_" style="display:none;"<?php if ($badgeHolder=="lanyard"){echo "checked";}?>>
+
+        <label for="lanyard">Lanyard</label><br>
+
+
+        <input type="radio" name="badgeHolder" value="magnet"<?php if ($badgeHolder=="magnet"){echo "checked";}?>>
+
+        <input type="radio" name="badgeHolder_" value="magnet_" style="display:none;"<?php if ($badgeHolder=="lanyard"){echo "checked";}?>>
+
+        <label for="magnet">Magnet</label>
+
+      </p>
+
+
+      <p>Provided Meals (Optional - Select all that apply):</p>
+
+      <p>
+
+        <input type="checkbox" name="fridayDinner"<?php if (isset($_POST['fridayDinner'])){echo "checked";}?>>
+
+        <input type="checkbox" name="fridayDinner_" style="display:none;"<?php if (isset($_POST['fridayDinner'])){echo "checked";}?>>
+
+        <label for="fridayDinner">Friday Dinner</label><br>
+
+
+        <input type="checkbox" name="saturdayLunch"<?php if (isset($_POST['saturdayLunch'])){echo "checked";}?>>
+
+        <input type="checkbox" name="saturdayLunch_" style="display:none;"<?php if (isset($_POST['saturdayLunch'])){echo "checked";}?>>
+
+        <label for="saturdayLunch">Saturday Lunch</label><br>
+
+
+        <input type="checkbox" name="sundayBrunch"<?php if (isset($_POST['sundayBrunch'])){echo "checked";}?>>
+
+        <input type="checkbox" name="sundayBrunch_" style="display:none;"<?php if (isset($_POST['sundayBrunch'])){echo "checked";}?>>
+
+        <label for="sundayBrunch">Sunday Award Brunch</label>
+
+      </p>
+
+      <p>
+
+        <label for="specialRequests">Special Requests/Requirements: (Limit 200 characters)<br>
+
+        </label>
+
+        <textarea name="specialRequests" cols="40" rows="5" maxlength="200"><?php if (isset($_POST['specialRequests'])){echo $special_requests;}?></textarea>
+
+        <textarea name="specialRequests_" style="display:none;" cols="40" rows="5" maxlength="200"><?php if (isset($_POST['specialRequests'])){echo $special_requests;}?></textarea>
+
+      </p>
+
+
+  <p>
+
+    <input type="submit" name="submit" value="Submit">
+
+    <input type="submit" name="submit_" value="Submit_" style="display:none;">
+
+
+
+    <input type="reset" value="Reset" onclick="clearForm()">
+
+
+    <p style="color:red;"></p>
+
+  </p>
+
+</form>
+
+</div>
+
+</body>
+
+</html>
