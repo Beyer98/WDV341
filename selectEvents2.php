@@ -1,6 +1,6 @@
 <?php
 	//Get the Event data from the server.
-	include 'connectPDO.php';
+	include 'DatabaseConnection.php';
 		$stmt = $conn->prepare("SELECT * FROM wdv341_events2");
 		$stmt->execute();
 ?>
