@@ -1,228 +1,345 @@
-<?php
-	$validForm = false;
-	$event_name = "";
-	$event_description = "";
-	$event_presenter = "";
-	$event_setting = null;
-	$event_date = "";
-	$event_time = "";
-	$event_name_errorMessage = "";
-	$event_description_errorMessage = "";
-	$event_presenter_errorMessage = "";
-	$event_setting_errorMessage = "";
-	$event_date_errorMessage = "";
-	$event_time_errorMessage = "";
-	if( isset($_POST["submitButton"]) ) {
-		
-		if( isset($event_setting) ) {
-			//echo "Event Setting is: " . $event_setting;
-			header("Location: http://www.google.com");
-		};
-		
-		$event_name = $_POST["eventName"];
-		$event_description = $_POST["eventDescription"];
-		$event_presenter = $_POST["eventPresenter"];
-		$event_setting = $_POST["eventSetting"];
-		$event_date = $_POST["eventDate"];
-		$event_time = $_POST["eventTime"];
-		//echo $event_date . "<br/>" . $event_time;
-		
-		$event_name_errorMessage = "";
-		$event_description_errorMessage = "";
-		$event_presenter_errorMessage = "";
-		$event_setting_errorMessage = "";
-		$event_date_errorMessage = "";
-		$event_time_errorMessage = "";
-		
-		$validForm = true;
-		
-		include("classValidations2.php");
-		$formValidations = new validations();
-		
-		$event_name = $formValidations->filterSpecialCharacters($event_name);
-		$event_description = $formValidations->filterSpecialCharacters($event_description);
-		$event_presenter = $formValidations->filterSpecialCharacters($event_presenter);
-		
-		//Validate Event Name
-		if ( $formValidations->cannotBeEmpty($event_name) ) {
-			$validForm = false;
-			$event_name_errorMessage = "-Please enter an Event Name";		
-		}
-		if( $formValidations->cannotBeNullOrUndefined($event_name) ) {
-			$validForm = false;
-			$event_name_errorMessage = "-Invalid entry, please enter an Event Name";
-		}
-		
-		//Validate Event Description
-		if ( $formValidations->cannotBeEmpty($event_description) ) {
-			$validForm = false;
-			$event_description_errorMessage = "-Please enter an Event Description";		
-		}
-		if( $formValidations->cannotBeNullOrUndefined($event_description) ) {
-			$validForm = false;
-			$event_description_errorMessage = "-Invalid entry, cannot contain text 'null' or 'undefined' ";
-		}
-		//Validate Presenter
-		if ( $formValidations->cannotBeEmpty($event_presenter) ) {
-			$validForm = false;
-			$event_presenter_errorMessage = "-Please enter a Presenter";		
-		}
-		if( $formValidations->cannotBeNullOrUndefined($event_presenter) ) {
-			$validForm = false;
-			$event_presenter_errorMessage = "-Invalid entry, please enter a Presenter";
-		}
-		
-		//Validate Event Date
-		if ( $formValidations->cannotBeEmpty($event_date) ) {
-			$validForm = false;
-			$event_date_errorMessage = "-Please enter an Event Date";		
-		}
-		
-		//Validate Event Time
-		if ( $formValidations->cannotBeEmpty($event_time) ) {
-			$validForm = false;
-			$event_time_errorMessage = "-Please enter an Event Time";		
-		}
-	}
-?>
-
 <!DOCTYPE html>
+
 <html>
+
 <head>
-	<title> PHP Event Form </title>
-    
-	<meta name="description" content="." />
-	<meta name="keywords" content="" />
-	
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	
-	<style>
-		* {
-			box-sizing: border-box;
-			font-family: "Tahoma", "Verdana", "Segoe", sans-serif;
-		}
-		
-		body {
-			background-color: #FFF7A0;
-		}
-		
-		main {
-			text-align: center;
-		}
-		
-		.eventFormSubmitContainer {
-			align-items: center;
-			margin-top: 200px;
-		}
-		
-		.eventFormContainer {
-			background-color: #94E6EB;
-			border-radius: 5%;
-			color: black;
-			width: 70%;
-		}
 
-		
-		
-		label[for=eventSetting], #eventSetting {
-			display: none;
-		}
-	
-		.errorMessage	{
-			color: #66ccff;
-			font-size: .9em;
-			font-style: italic;
-			margin-bottom: 5px;
-		}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-	</style>
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script>
-		$(document).ready( function() {
-			$("#resetButton").click( function() {
-				$(".errorMessage").html("");
-			});
-		});
-	</script>
-</head>
-	
-<body>
-	<main>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
-<?php
-if($validForm) {
-	
-	//IF VALID DATA insert into Database
-	include("connectPDO.php");
-	try {
-		$sql = "INSERT INTO wdv341_events2 (event_id, event_name, event_description, event_presenter, event_date, event_time)
-		VALUES (NULL, :evtName, :evtDescription, :evtPresenter, :evtDate, :evtTime)";
-				
-		$statementObject = $conn->prepare($sql);
-		
-		$statementObject->bindParam(':evtName', $event_name);
-		$statementObject->bindParam(':evtDescription', $event_description);
-		$statementObject->bindParam(':evtPresenter', $event_presenter);
-		$statementObject->bindParam(':evtDate', $event_date);
-		$statementObject->bindParam(':evtTime', $event_time);
-		
-		$statementObject->execute();	
+<title>WDV341 Intro PHP - Events Form</title>
+
+<style>
+
+
+#orderArea	
+
+{
+
+  border:thin solid black;
+
+  padding:20px;
+
+  margin:20px;
+
+}
+
+
+#orderArea h3	
+
+{
+
+  text-align:center;
+
+  padding-bottom:20px;
+
+}
+
+.error	
+
+{
+
+	color:red;
+
+	font-style:italic;	
+
+}
+
+
+</style>
+
+
+<script>
+
+$(document).ready(function() {
+
+  $("textarea").keypress(function(event) {
+
+    if(event.which == '13') {
+
+      return false;
+
     }
-	catch(PDOException $e) {
-		echo $sql . "<br>" . $e->getMessage();
-	}
+
+  });
+
+});
+
+</script>
+
+
+<?php 
+
+
+  include("eventFormValidation.php");
+
+  $formValidations = new validations();
+
+
+  $event_name="";
+
+  $event_presenter="";
+
+  $event_description="";
+
+  $event_date="";
+
+  $event_time="";
+
+
+  if( isset($_POST['submit']) )
+
+	{
+
+    //ASSIGNMENTS
+
+    $event_name=$_POST["eventName"];
+
+    $event_presenter=$_POST["eventPresenter"];
+
+    $event_description=$_POST["eventDescription"];
+
+    $event_date=$_POST["eventDate"];
+
+    $event_time=$_POST["eventTime"];
+
+
+    //INDIVIDUAL VALIDATIONS
+
+    if($formValidations->validateName($event_name))
+
+    {
+
+      $name_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $name_validation="bad";
+
+      echo "<div class='error'>Event name is invalid</div>";
+
+    }
+
+
+    if($formValidations->validatePresenter($event_presenter))
+
+    {
+
+      $presenter_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $presenter_validation="bad";
+
+      echo "<div class='error'>Presenter name is invalid</div>";
+
+    }
+
+
+    if($formValidations->validateDescription($event_description))
+
+    {
+
+      $description_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $description_validation="bad";
+
+      echo "<div class='error'>Description is invalid</div>";
+
+    }
+
+
+    if($formValidations->validateDate($event_date))
+
+    {
+
+      $date_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $date_validation="bad";
+
+      echo "<div class='error'>Please enter a valid date</div>";
+
+    }
+
+
+    if($formValidations->validateTime($event_time))
+
+    {
+
+      $time_validation="good";
+
+    }
+
+    else
+
+    {
+
+      $date_validation="bad";
+
+      echo "<div class='error'>Please enter a valid time</div>";
+
+    }
+
+    //VALIDATION CHECKER
+
+    if($name_validation=="good"&&$presenter_validation=="good"&&$description_validation=="good"&&$date_validation=="good"&&$time_validation=="good")
+
+    {
+
+        $serverName = "localhost";
+
+        $database = "wdv341";
+
+        $username = "root";
+
+        $password = "root";
+
+
+        try 
+
+        {
+
+            $conn = new PDO("mysql:host=$serverName;dbname=$database", $username, $password);
+
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        }
+
+
+        catch(PDOException $e)
+
+        {
+
+            echo "Connection failed: " . $e->getMessage();
+
+        }
+
+
+        $sql = "INSERT INTO wdv341 (event_name,event_presenter,event_description,event_date,event_time) VALUES ('$event_name','$event_presenter','$event_description','$event_date','$event_time')";
+
+
+        $statementObject=$conn->prepare($sql);
+
+    
+        $statementObject->execute();
+
+
+        echo "<span style='color:red;'>The form has been successfully submitted</span>";
+
+    }
+
+  }
+
 ?>
-		
-	<div class="eventFormSubmitContainer">
-		<h1>Thank You!</h1>
-		<h3>Your event has been submitted.</h3>
-		<p><?php echo $sql ?></p>
-	</div>
 
-<?php
-}
-else {
-?>
-	<div class="eventFormContainer">
-		<form action="eventsFroms.php" method="post">
-			<label for="eventName"> Event Name <span class="errorMessage"><?php echo $event_name_errorMessage ?></span> </label>
-			<input id="eventName" name="eventName" placeholder="Ex. Birthday Bash" type="text" value="<?php echo $event_name ?>" /> <br>
+</head>
 
-			<label for="eventDescription"> Event Description -- (Limit 200 characters)</label> <br>
-			<span class="errorMessage"><?php echo $event_description_errorMessage ?></span>
-			<textarea id="eventDescription" maxlength="200" name="eventDescription" placeholder="Description of Your Event"><?php echo $event_description ?></textarea> <br>
-			
-			<label for="eventPresenter"> Host's Name <span class="errorMessage"><?php echo $event_presenter_errorMessage ?></span> </label>
-			<input id="eventPresenter" name="eventPresenter" placeholder="Ex. Jane Doe" type="text" value="<?php echo $event_presenter ?>" />
-			
-			<label for="eventSetting"> Event Setting <span class="errorMessage"><?php echo $event_setting_errorMessage ?></span> </label>
-			<input id="eventSetting" name="eventSetting" placeholder="Ex. Inside or Outside?" type="text" value="<?php echo $event_setting ?>" />			
 
-			<div>
-				<div>
-					<label for="eventDate"> Event Date </label>
-					<input id="eventDate" name="eventDate" type="date" value="<?php echo $event_date ?>" />		
-				</div>
-				<div>
-					<label for="eventTime"> Event Time </label>
-					<input id="eventTime" name="eventTime" type="time" value="<?php echo $event_time ?>" />
-				</div>
-				<div>
-					<span class="errorMessage"><?php echo $event_date_errorMessage ?></span>
-					<span class="errorMessage"><?php echo $event_time_errorMessage ?></span>				
-				</div>
-			</div>
-			<div>
-				<input type="submit" name="submitButton" id="submitButton" value="Submit">
-				<input type="reset" name="resetButton" id="resetButton" value="Reset">
-			</div>
-		</form>
-	</div>
-<?php
-}
-?>		
-	</main>
+<body>
+
+
+<div id="orderArea">
+
+<form name="form3" method="post" action="">
+
+  <h3>Event Registration Form</h3>
+
+
+      <p>
+
+        <label for="eventName">Event Name: </label>
+
+        <input type="text" name="eventName" value="<?php echo $event_name; ?>">
+
+        <input type="text" name="eventName_" style="display:none;" value="<?php echo $event_name; ?>">
+
+      </p>
+
+
+      <p>
+
+        <label for="eventPresenter">Presenter Name: </label>
+
+        <input type="text" name="eventPresenter" value="<?php echo $event_presenter; ?>">
+
+        <input type="text" name="eventPresenter_" style="display:none;" value="<?php echo $event_presenter; ?>">
+
+      </p>
+
+
+      <p>
+
+        <label for="eventDescription">Description: </label>
+
+        <textarea name="eventDescription" cols="40" rows="5" maxlength="200"><?php if (isset($_POST['eventDescription'])){echo $event_description;}?></textarea>
+
+        <textarea name="eventDescription_" style="display:none;" cols="40" rows="5" maxlength="200"><?php if (isset($_POST['eventDescription'])){echo $event_description;}?></textarea>
+
+      </p>
+
+
+      <p>
+
+        <label for="eventDate">Date (yyyy-mm-dd format): </label>
+
+        <input type="text" name="eventDate" value="<?php echo $event_date; ?>">
+
+        <input type="text" name="eventDate_" style="display:none;" value="<?php echo $event_date; ?>">
+
+      </p>
+
+
+      <p>
+
+        <label for="eventTime">Time (hh:mm format): </label>
+
+        <input type="text" name="eventTime" value="<?php echo $event_time; ?>">
+
+        <input type="text" name="eventTime_" style="display:none;" value="<?php echo $event_time; ?>">
+
+      </p>
+
+  <p>
+
+    <input type="submit" name="submit" value="Submit">
+
+    <input type="submit" name="submit_" value="Submit_" style="display:none;">
+
+
+    <input type="reset" value="Reset" onclick="clearForm()">
+
+
+    <p style="color:red;"></p>
+
+  </p>
+
+</form>
+
+
+</div>
+
+
 </body>
+
 </html>
