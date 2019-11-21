@@ -1,6 +1,6 @@
 <?php
 //connect to database
-include "connectPDO copy.php";
+include "DatabaseConnection.php";
 	
 // create SELECT query
 $sql = "SELECT event_id, event_name, event_description, event_presenter, event_date, event_time FROM wdv341_events2";
