@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>S&J</title>
+	<link rel="stylesheet" href="https://use.typekit.net/nts2seq.css">
+	<link rel="stylesheet" href="wedding.css">
+	<style>
+		#countDownTimer{
+			text-align: center;
+		}
+		@media screen and (min-width: 601px){
+			#countDownTimer{
+				font-size: 5em;
+			}
+		}
+		@media screen and (max-width: 600px){
+			#countDownTimer{
+				font-size: 2em;
+			}
+		}
+
+	</style>
+</head>
+	
+
+<body>
+	<img src="images/lights.png" class="waterColorsFlowers" alt="Water Color flowers">
+	
+	<div class="container">
+		
+		<div class="soYouCanSee">
+			
+		<h1>Sophia and Thomas</h1>
+		<h2>August 8th, 2020</h2></div>
+				<div class="headerArea">
+				<div class="topnav" id="myTopnav">
+					  <a href="../weddingPHP.html" class="active">Home</a>
+					  <a href="weddingParty.html">The Wedding Party</a>
+					  <a href="../theVenue.html">The Venue</a>
+					  <a href="login/emailer copy/formEmailer.html">Contact Us!</a>
+					  <a href="login/login.php">Sign In!</a> 
+					  <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
+				</div>
+			</div>
+	
+		<img src="images/s&j.jpg" class="usImg" alt="">
+		<img src="images/waterColorFlowersAgain.gif" class="waterFlower" alt="">
+		
+			<h2 class="clear">Here's to Love</h2>
+			<h2>and</h2>
+			<h2>Laughter</h2>
+			<h2>and</h2>
+			<h2>Happily</h2>
+			<h2>Ever After</h2>
+		
+		<img src="images/waterColorImg.gif" class="waterFlower2" alt="">
+	
+	</div>	
+	<div class="parallax"></div>
+
+	<div class="divArea1">
+		<h1>The Adventure Begins</h1>
+<p id="countDownTimer"></p>
+
+<script>
+// Set the date we're counting down to
+var countDownDate = new Date("Aug 3, 2019 12:00:00").getTime();
+
+// Update the count down every 1 second
+var x = setInterval(function() {
+
+  // Get todays date and time
+  var now = new Date().getTime();
+    
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now;
+    
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+  // Output the result in an element with id="countDownTimer"
+  document.getElementById("countDownTimer").innerHTML = days + "d " + hours + "h "
+  + minutes + "m " + seconds + "s ";
+    
+  // If the count down is over, write some text 
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("countDownTimer").innerHTML = "EXPIRED";
+  }
+}, 1000);
+</script>
+		
+	</div>
+	
+	<div class="parallax2"></div>
+
+	<div class="divArea2">
+		<h1>Our Journey</h1>
+		
+	<div class="timeline">
+  <div class="holder left">
+    <div class="content">
+      <h3>March 15th, 2018</h3>
+      <p class="timelineContent">Jessica and Shane went on their first date to the Newton Drive in theatre to see Han Solo. They were friends since early highschool and decided to give love a shot.</p>
+    </div>
+  </div>
+  <div class="holder right">
+    <div class="content">
+      <h3>November 30, 2018</h3>
+       <p class="timelineContent">Jessica and Shane became official.</p>
+    </div>
+  </div>
+  <div class="holder left">
+    <div class="content">
+      <h3>November 30th, 2018</h3>
+       <p class="timelineContent">Shane popped the question, She said yes!</p>
+    </div>
+  </div>
+  <div class="holder right">
+    <div class="content">
+      <h3>August 3th, 2019</h3>
+       <p class="timelineContent">They say "I do".</p>
+    </div>
+  </div>
+</div>
+	</div>
+
+</body>
+</html>
