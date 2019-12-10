@@ -1,12 +1,19 @@
-<?php 
-//use current session
+<?php
+
 session_start();
-//user is not longer a valid user
-$_SESSION["validUser"] = "no";
-//remove session variables
-session_unset();
-//remove current session
+
+
+
+$_SESSION['validUser'] = false;
+
+session_unset();	//remove all session variables related to current session
+
 session_destroy();
-//redirect to login page
-header('location: login.php');
+
+
+
+header( "refresh:5;url=login.php" );
+
+echo"Succesfully logged out. You will be redirected back to login page in 5 seconds. <a href='login.php'>Click here if you are not redirected.</a>";
+
 ?>
