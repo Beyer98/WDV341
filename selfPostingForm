@@ -1,223 +1,371 @@
 <?php
 
-	$prod_name = "";	//define variable
+require('FormValidator.php');
+
+$v = new FormValidator();
+
+$inName = "";
+
+$inPhone = "";
+
+$inEmail = "";
+
+$inRegistration = "";
+
+$inBadge = "";
+
+$inFridayMeal = false;
+
+$inSatMeal = false;
+
+$inSunMeal = false;
+
+$inRequest = "";
+
+$robotValidation = false;
 
 
 
-	$name_errMsg = "";	//define variable
+$robotError = "";
 
-	
-
-	$valid_form = false;
+$errorMessage = "";
 
 
 
-	if( isset($_POST['prod_submit']) )
+//if captcha solved robotValidation=true
 
-	{
+if(isset($_POST["g-recaptcha-response"]) && !empty($_POST["g-recaptcha-response"])) {
 
-		//process form data	
+    $secret = "6Ldwj7wUAAAAAKBlnPpB5cX-E72twjQc4SfpOK8y";
 
-		
+    $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
 
-		$prod_name = $_POST['prod_name'];
+    $responseData = json_decode($verifyResponse);
 
-		$prod_price = $_POST['prod_price'];
+    if($responseData->success)
 
-		$prod_color = $_POST['prod_color'];
+    {
 
-		$prod_wagon = $_POST['prod_wagon'];
+        $robotValidation = true;
 
-		
+    }
 
+    else
 
+    {
 
-		$valid_form = true;		//set validation flag assume all fields are valid
+        $robotValidation = false;
 
-		
+    }
 
-		include 'validationsAdvanced.php';	//get validation functions		
-
-		
-
-		if( !validateProdName($prod_name) ) {
-
-			$valid_form = false;
-
-			$name_errMsg = "Please enter a product name";
-
-		}
-
-		
-
-		if( !validateProdPrice($prod_color) )	{
-
-			$valid_form = false;
-
-			$price_errorMsg = "Price must be numeric and greater than zero";				
-
-		}
-
-		
-
-		
-
-		if($valid_form) {
-
-			//Form is good, send to database
+}
 
 
 
-		}
+//refill form
 
-			//else display the form with original values and error messages
+if(isset($_POST["submit"])) {
+
+    $inName = $_POST["nameText"];
+
+    $inPhone = $_POST["phoneText"];
+
+    $inEmail = $_POST["emailText"];
+
+    $inRegistration = $_POST["registration"];
+
+    if (isset($_POST["badgeRadio"])) {
+
+        $inBadge = $_POST["badgeRadio"];
+
+    }
+
+    if (isset($_POST["fridayCheck"])) {
+
+        $inFridayMeal = true;
+
+    }
+
+    if (isset($_POST["saturdayCheck"])) {
+
+        $inSatMeal = true;
+
+    }
+
+    if (isset($_POST["sundayCheck"])) {
+
+        $inSunMeal = true;
+
+    }
+
+    $inRequest = $_POST["specialRequest"];
 
 
 
-	}
+    if (!($v::validateName($inName))) {
 
-//	else
+        $errorMessage .= "Invalid Name <br>";
 
-//	{
+    }
 
-		//show the form to the customer/user
+    if (!($v::validatePhone($inPhone))) {
+
+        $errorMessage .= "Invalid Phone <br>";
+
+    }
+
+    if (!($v::validateEmail($inEmail))) {
+
+        $errorMessage .= "Invalid Email <br>";
+
+    }
+
+    if (empty($inRegistration)) {
+
+        $errorMessage .= "Must select registration type <br>";
+
+    }
+
+    if (empty($inBadge)) {
+
+        $errorMessage .= "Must select a badge holder <br>";
+
+    }
+
+    if (!($v::validateTextArea($inRequest, 200))) {
+
+        $errorMessage .= "Your request is too long or contains an invalid character <br>";
+
+    }
+
+    if ($robotValidation) { 
+
+        if(empty($errorMessage)) {
+
+            //do stuff with data
+
+            //echo "<p> $inName, $inPhone, $inEmail, $inRegistration, $inBadge, $inFridayMeal, $inSatMeal, $inSunMeal, $inRequest </p>";
+
+        }
+
+    } else {
+
+        $robotError = "Captcha failed";
+
+    }
+
+
+
+
+
+}
+
+
+
+if(isset($_POST["reset"])) {
+
+    //runs top of page to set values to default
+
+}
+
+
+
+
 
 ?>
 
-        <!doctype html>
+<!DOCTYPE html>
 
-        <html>
+<html >
 
-        <head>
+    <head>
 
-        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-        <title>Self-Posting Form</title>
+        <title>WDV341 Intro PHP - Self Posting Form</title>
 
-        </head>
+        <style>
 
-        
 
-        <body>
 
-        
+            #orderArea	{
 
-        <h1>WDV341 Intro PHP </h1>
+                width:600px;
 
-        <h2>Unit-8 Self Posting Form</h2>
+                border:thin solid black;
 
-        <h3>Example Form</h3>
+                margin: auto auto;
 
-        <p>Converting a form to a self posting form.</p>
+                padding-left: 20px;
 
-        
+            }
 
-        <?php
 
-			if($valid_form)
 
-			{
+            #orderArea h3	{
 
-		?>
+                text-align:center;	
 
-			<h1>Form Was Successful</h1>
+            }
 
-            <h2>Thank you for submitting your information</h2>        
+            .error	{
 
-        <?php
+                color:red;
 
-			}
+                font-style:italic;	
 
-			else
+            }
 
-			{
 
-		?>
 
-        <form name="form1" method="post" action="selfPostExample.php">
+        </style>
 
-          <p>
 
-            <label for="prod_name">Product Name: </label>
 
-            <input type="text" name="prod_name" id="prod_name" value="<?php echo $prod_name; ?>">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-            <span id="errorName"><?php echo $name_errMsg; ?></span>
+    </head>
 
-          </p>
 
-          <p>
 
-            <label for="prod_price">Product Price: </label>
+    <body>
 
-            <input type="text" name="prod_price" id="prod_price" value="<?php echo $prod_price; ?>">
+        <h1>WDV341 Intro PHP</h1>
 
-            <span id="errorPrice"><?php echo $price_errMsg; ?></span>          
+        <h2>Unit-5 and Unit-6 Self Posting - Form Validation Assignment
 
-          </p>
 
-          <p>Product Color:</p>
 
-          <p>
 
-            <input type="radio" name="prod_color" id="prod_red" value="prod_red">
 
-            <label for="prod_red">Red<br></label>
-
-            <input type="radio" name="prod_color" id="prod_green" value="prod_green">
-
-            <label for="prod_green">Green</label>
-
-            <input type="radio" name="prod_color" id="prod_blue" value="prod_blue">
-
-            <label for="prod_blue">Blue</label>            
-
-          </p>
-
-          <p>
-
-          	<select name="prod_wagon" id="prod_wagon">
-
-            	<option value="">Select Wagon</option>
-
-            	<option value="wag_sm">Small Wagon</option>
-
-            	<option value="wag_md">Medium Wagon</option>
-
-                <option value="wag_lg">Large Wagon</option>
-
-            </select>
-
-          </p>
-
-          <p>
-
-            <input type="submit" name="prod_submit" id="prod_submit" value="Submit">
-
-            <input type="reset" name="Reset" id="button" value="Reset">
-
-          </p>
-
-        </form>
-
-        <?php
-
-			}	//end valid form confirmation 
-
-		?>
-
-        
+        </h2>
 
         <p>&nbsp;</p>
 
 
 
-<?php
 
-//	}//end of check for submit to display form
 
-?>
+        <div id="orderArea">
 
-</body>
+            <form name="form3" method="post" action="customerRegistrationForm.php">
+
+                <h3>Customer Registration Form</h3>
+
+
+
+                <p>
+
+                    <label for="nameText">Name:</label>
+
+                    <input type="text" name="nameText" id="nameText" value="<?php echo "$inName" ?>">
+
+                </p>
+
+                <p>
+
+                    <label for="phoneText">Phone Number:</label>
+
+                    <input type="text" name="phoneText" id="phoneText" value="<?php echo "$inPhone" ?>">
+
+                </p>
+
+                <p>
+
+                    <label for="emailText">Email Address: </label>
+
+                    <input type="text" name="emailText" id="emailText" value="<?php echo "$inEmail" ?>">
+
+                </p>
+
+                <p>
+
+                    <label for="registration">Registration: </label>
+
+                    <select name="registration" id="registration">
+
+                        <option value="" <?php if(isset($inRegistration) && $inRegistration=="") {echo "selected";} ?> >Choose Type</option>
+
+                        <option value="Attendee" <?php if(isset($inRegistration) && $inRegistration=="Attendee") {echo "selected";} ?>>Attendee</option>
+
+                        <option value="Presenter" <?php if(isset($inRegistration) && $inRegistration=="Presenter") {echo "selected";} ?>>Presenter</option>
+
+                        <option value="Volunteer" <?php if(isset($inRegistration) && $inRegistration=="Volunteer") {echo "selected";} ?>>Volunteer</option>
+
+                        <option value="Guest" <?php if(isset($inRegistration) && $inRegistration=="Guest") {echo "selected";} ?>>Guest</option>
+
+                    </select>
+
+                </p>
+
+                <p>Badge Holder:</p>
+
+                <p>
+
+                    <input type="radio" name="badgeRadio" id="clip" <?php if (isset($inBadge) && $inBadge=="clip") echo "checked";?> value="clip">
+
+                    <label for="clip">Clip</label> <br>
+
+                    <input type="radio" name="badgeRadio" id="lanyard" <?php if (isset($inBadge) && $inBadge=="lanyard") echo "checked";?> value="lanyard">
+
+                    <label for="lanyard">Lanyard</label> <br>
+
+                    <input type="radio" name="badgeRadio" id="magnet" <?php if (isset($inBadge) && $inBadge=="magnet") echo "checked";?> value="magnet">
+
+                    <label for="magnet">Magnet</label>
+
+                </p>
+
+                <p>Provided Meals (Select all that apply):</p>
+
+                <p>
+
+                    <input type="checkbox" name="fridayCheck" id="fridayCheck" <?php if ($inFridayMeal) echo "checked";?>>
+
+                    <label for="fridayCheck">Friday Dinner</label><br>
+
+                    <input type="checkbox" name="saturdayCheck" id="saturdayCheck" <?php if ($inSatMeal) echo "checked";?>>
+
+                    <label for="saturdayCheck">Saturday Lunch</label><br>
+
+                    <input type="checkbox" name="sundayCheck" id="sundayCheck" <?php if ($inSunMeal) echo "checked";?>>
+
+                    <label for="sundayCheck">Sunday Award Brunch</label>
+
+                </p>
+
+                <p>
+
+                    <label for="textarea">Special Requests/Requirements: (Limit 200 characters)<br>
+
+                    </label>
+
+                    <textarea name="specialRequest" cols="40" rows="5" id="specialRequest"><?php echo $inRequest;?></textarea>
+
+                </p>
+
+
+
+                <div class="g-recaptcha" data-sitekey="6Ldwj7wUAAAAABFpKd-j8I0GWxb3zPCzX-yCZDx1"></div>
+
+                <?php echo "<p> $robotError </p>"?>
+
+                <?php echo "<p> $errorMessage </p>"?>
+
+                <p>
+
+                    <input type="submit" name="submit" id="submit" value="Submit">
+
+                    <input type="submit" name="reset" id="reset" value="Reset">
+
+                </p>
+
+            </form>
+
+        </div>
+
+
+
+    </body>
 
 </html>
