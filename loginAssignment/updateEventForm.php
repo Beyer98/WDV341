@@ -1,282 +1,341 @@
 <?php
-//connect to database
-include "connectPDO copy.php";
-$eventId= $_GET["id"];
-//variables to filled from form
-$inEventName = "";
-$inEventDescription = "";
-$inEventPresenter = "";
-$inEventDate = "";
-$inEventTime = "";
-//variables to hold error messages
-$eventNameError = "";
-$eventDescriptionError = "";
-$eventPresenterError = "";
-$eventDateError = "";
-$eventTimeError = "";
-//variable to determine if form is valid( initially set to "false" to return an invalid (initally blank) form)
-$validForm = false;
-//form validation functions
-function validateName() //Event Name must be included
-{
-	global $inEventName, $eventNameError, $validForm;
-	
-	if($inEventName == "")
-	{
-		$validForm = false;
-		$eventNameError = "Please enter the name of the event.<br>";
-	}
+
+session_start();
+
+if(isset($_SESSION['validUser']) && $_SESSION['validUser'] == true) {
+
+    require_once("connectPDO.php");
+
+    require_once("FormValidator.php");
+
+
+
+    $v = new FormValidator();
+
+    $name = "";
+
+    $description = "";
+
+    $presenter = "";
+
+    date_default_timezone_set('America/Chicago');
+
+    $date = date('Y-m-d', time());
+
+    $time = date('G:i', time());
+
+
+
+    $errorMessage = "";
+
+
+
+    //refill form
+
+    if(isset($_POST["submit"])) {
+
+        $name = $_POST["nameText"];
+
+        $description = $_POST["descText"];
+
+        $presenter = $_POST["presenterText"];
+
+        $date = $_POST["date"];
+
+        $time = $_POST["time"];
+
+
+
+        if (empty($name)) {
+
+            $errorMessage .= "Invalid Name <br>";
+
+        } else if (!($v::validateTextArea($description, 150))) {
+
+            $errorMessage .= "Invalid Name <br>";
+
+        }
+
+        if (empty($description)) {
+
+            $errorMessage .= "Invalid Description <br>";
+
+        } else if (!($v::validateTextArea($description, 150))) {
+
+            $errorMessage .= "Invalid Description <br>";
+
+        }
+
+        if (!($v::validateName($presenter))) {
+
+            $errorMessage .= "Invalid Presenter <br>";
+
+        }
+
+
+
+        if(empty($errorMessage)) {
+
+            //do stuff with data
+
+
+
+            echo($name . "  " . $description . "  " . $presenter . "  " . $date . "  " . $time . "  " . $errorMessage);
+
+            try {
+
+                $stmt = $conn->prepare("UPDATE wdv341_events 
+
+            SET event_name='$name', 
+
+            event_description='$description', 
+
+            event_presenter='$presenter', 
+
+            event_date='$date', 
+
+            event_time='$time'
+
+            WHERE event_id='" . $_GET['id'] . "';");
+
+
+
+                $stmt->execute();
+
+
+
+                echo("<h1>The event was sucessfully edited.</h1>");
+
+            } catch (PDOException $ex) {
+
+                $errorMessage = $ex->getMessage();
+
+            } 
+
+        }
+
+    } else { //Submit was not clicked
+
+        if(isset($_GET['id'])) {
+
+            try {
+
+                $id = $_GET['id'];
+
+
+
+                $sql = "
+
+                SELECT event_id, event_name, event_description, event_presenter, DATE_FORMAT(event_date, '%Y-%c-%e') AS date, event_time
+
+                FROM wdv341_events
+
+                WHERE event_id = $id";
+
+                $stmt = $conn->prepare($sql);
+
+                $stmt->execute();
+
+
+
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $name = $row['event_name'];
+
+                $description = $row['event_description'];
+
+                $presenter = $row['event_presenter'];
+
+                $date = $row['date'];
+
+                $time = $row['event_time'];
+
+            } catch (PDOException $ex) {
+
+                $errorMessage = $ex->getMessage();
+
+                header( "refresh:5;url=selectEvents.php" );
+
+                echo"An error occured, please try again later. You will be redirected back to selectEvents in 5 seconds. <a href='selectEvents.php'>Click here if you are not redirected.</a>";
+
+            }
+
+        } else {
+
+            header( "refresh:5;url=selectEvents.php" );
+
+            echo"An error occured, the record to edit was not found. You will be redirected back to selectEvents in 5 seconds. <a href='selectEvents.php'>Click here if you are not redirected.</a>";
+
+        }
+
+    }
+
+
+
+    if(isset($_POST["reset"])) {
+
+        if(isset($_GET['id'])) {
+
+            try {
+
+                $id = $_GET['id'];
+
+
+
+                $sql = "
+
+                SELECT event_id, event_name, event_description, event_presenter, DATE_FORMAT(event_date, '%Y-%c-%e') AS date, event_time
+
+                FROM wdv341_events
+
+                WHERE event_id = $id";
+
+                $stmt = $conn->prepare($sql);
+
+                $stmt->execute();
+
+
+
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $name = $row['event_name'];
+
+                $description = $row['event_description'];
+
+                $presenter = $row['event_presenter'];
+
+                $date = $row['date'];
+
+                $time = $row['event_time'];
+
+            } catch (PDOException $ex) {
+
+                $errorMessage = $ex->getMessage();
+
+                header( "refresh:5;url=selectEvents.php" );
+
+                echo"An error occured, please try again later. You will be redirected back to selectEvents in 5 seconds. <a href='selectEvents.php'>Click here if you are not redirected.</a>";
+
+            }
+
+        } else {
+
+            header( "refresh:5;url=selectEvents.php" );
+
+            echo"An error occured, the record to edit was not found. You will be redirected back to selectEvents in 5 seconds. <a href='selectEvents.php'>Click here if you are not redirected.</a>";
+
+        }
+
+    }
+
+} else {
+
+    header("Location: login.php");
+
 }
-function validateDescription() //Event Description must be included
-{
-	global $inEventDescription, $eventDescriptionError, $validForm;
-	
-	if($inEventDescription == "")
-	{
-		$validform = false;
-		$eventDescriptionError = "Please enter a description of the event.<br>";
-	}
-}
-function validatePresenter() //Event Presenter must be included
-{
-	global $inEventPresenter, $eventPresenterError, $validForm;
-	
-	if($inEventPresenter =="")
-	{
-			$validForm = false;
-			$eventPresenterError = "Please enter the name of the event presenter.<br>";
-	}
-}
-function validateDate() //Event Date must be in mm/dd/yyyy format
-{
-	global $inEventDate, $eventDateError, $validForm;
-	
-	$date_regex = '/(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.](19|20)\d\d/'; //mm/dd/yyyy
-	
-	if (!preg_match($date_regex, $inEventDate))
-	{
-		$validForm = false;
-		$eventDateError = "Please enter your event date in the MM/DD/YYYY format between the dates of 01/01/1900 and 12/31/2099.<br>";
-	}		
-}
-function validateTime() //Event Start Time must be in hh:mm am/pm format
-{
-	global $inEventTime, $eventTimeError, $validForm;
-	
-	$time_regex = '((1[0-2]|0?[1-9]):([0-5][0-9]) ([AaPp][Mm]))'; //hh:mm am/pm
-	
-	if(!preg_match($time_regex, $inEventTime))
-	{
-		$validForm = false;
-		$eventTimeError = "Please enter your event time in the HH:MM AM/PM format.<br>";
-	}
-}
-//function to determine if the "submit" button has been pressed (a form has been submitted)
-if(isset($_POST["submit"]))
-{
-	//fill variables from form
-	$inEventName = $_POST["eventName"];
-	$inEventDescription = $_POST["eventDescription"];
-	$inEventPresenter = $_POST["eventPresenter"];
-	$inEventDate = $_POST["eventDate"];
-	$inEventTime = $_POST["eventTime"];
-	//assume the form is valid before validating
-	$validForm = true;
-	
-	//validate form
-	validateName();
-	validateDescription();
-	validatePresenter();
-	validateDate();
-	validateTime();
-	//if the form has been submitted and is valid...
-	if($validForm)
-	{
-		$sql= "UPDATE wdv341_events2 SET event_name= '$inEventName', event_description= '$inEventDescription', event_presenter= '$inEventPresenter', event_date= '$inEventDate', event_time= '$inEventTime' WHERE event_id= $eventId";
-	
-		$result= $conn->query($sql);
-	
-		if($result)
-		{
+
 ?>
+
+
+
 <!DOCTYPE html>
-<html>
-<head>
-<style>
-.error {
-	color: red;
-	font-style: italic;
-	line-height: 0;
-}
-body {
-	background-color: #FF9F1C;
-}
-#container {
-	width: 75%;
-	margin: 2% 10%;
-	border: 2px solid black;
-	text-align: center;
-	background-color: #FFC15E;
-}
-input[type=text] {
-	background-color: #ffffcc;
-}
-textarea {
-	background-color: #ffffcc;
-}
-.projectTitle {
-	text-decoration: underline;
-}
-</style>
-</head>
-<body>
 
-<div id="container">
-<h1>Record <?php echo $eventId ?> has been updated!</h1>
-<p><a href="selectEvents.php">Return to Events</p>
-</div>
-</body>
+<html lang="">
+
+    <head>
+
+        <meta charset="utf-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Events insert</title>
+
+        <style>
+
+            .error	{
+
+                color:red;
+
+                font-style:italic;	
+
+            }
+
+        </style>
+
+    </head>
+
+
+
+    <body>
+
+        <h1>WDV341</h1>
+
+        <h2>SQL Edit event in wdv341_events table</h2>
+
+        <a href="login.php">Return to login page</a>
+
+        <form name="eventsForm" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) . "?id=" . $_GET['id'] ?>">
+
+
+
+            <p>
+
+                <label for="nameText">Event Name:</label>
+
+                <input type="text" name="nameText" id="nameText" value="<?php echo "$name" ?>">
+
+            </p>
+
+            <p>
+
+                <label for="descText">Event Description:</label>
+
+                <input type="text" name="descText" id="descText" value="<?php echo "$description" ?>">
+
+            </p>
+
+            <p>
+
+                <label for="presenterText">Event Presenter:</label>
+
+                <input type="text" name="presenterText" id="presenterText" value="<?php echo "$presenter" ?>">
+
+            </p>
+
+
+
+            <p>
+
+                <label for="date">Event date:</label>
+
+                <input type="date" name="date" id="date" value="<?php echo "$date" ?>">
+
+            </p>
+
+
+
+            <p>
+
+                <label for="time">Event time (CNT):</label>
+
+                <input type="time" name="time" id="time" value="<?php echo "$time" ?>">
+
+            </p>
+
+            <?php echo "<p class='error'> $errorMessage </p>"?>
+
+            <p>
+
+                <input type="submit" name="submit" id="submit" value="Update">
+
+                <input type="submit" name="reset" id="reset" value="Reset">
+
+            </p>
+
+        </form>
+
+
+
+    </body>
+
 </html>
-
-<?php
-		}
-	}
-	//else, if the form has been submitted and is invalid...
-	else
-	{
-?>
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-.error {
-	color: red;
-	font-style: italic;
-}
-body {
-	background-color: #FF9F1C;
-}
-#container {
-	width: 75%;
-	margin: 2% 10%;
-	border: 2px solid black;
-	text-align: center;
-	background-color: #FFC15E;
-}
-input[type=text] {
-	background-color: #ffffcc;
-}
-textarea {
-	background-color: #ffffcc;
-}
-.projectTitle {
-	text-decoration: underline;
-}
-</style>
-</head>
-<body>
-
-<div id="container">
-<h1>Uh-Oh! Some information was entered wrong, please try again!</h1>
-
-<form name="form1" method="post" action="updateEventForm.php?id=<?php echo $eventId?>">
-<p>Event Name:<br> <span class="error"><?php echo $eventNameError?></span><input type="text" name="eventName" id="eventName" value="<?php echo $inEventName?>"></p>
-
-<p>Event Description:<br><span class="error"><?php echo $eventDescriptionError?></span><textarea name="eventDescription" id="eventDescription" rows="8" cols="50"><?php echo $inEventDescription?></textarea></p>
-
-
-<p</form>Event Presenter:<br><span class="error"><?php echo $eventPresenterError?></span><input type="text" name="eventPresenter" id="eventPresenter" value="<?php echo $inEventPresenter?>"></p>
-
-<p>Event Date (mm/dd/yyyy):<br><span class="error"><?php echo $eventDateError?></span><input type="text" name="eventDate" id="eventDate" value="<?php echo $inEventDate?>"></p>
-
-<p>Event Start Time (hh:mm am/pm):<br><span class="error"><?php echo $eventTimeError?></span><input type="text" name="eventTime" id="eventTime" value="<?php echo $inEventTime?>"></p>
-
-<p><input type="submit" name="submit" value="Submit Information">
-	<input type="reset" name="reset" value="Reset Information"></p>
-
-</form>
-
-<p><a href="selectEvents.php">Return to Events</p>
-
-</div>
-</body>
-</html>
-
-<?php
-	}
-}
-//else, if the form has not been submitted (first time seeing it)...
-else
-{
-	$sql= "SELECT event_id, event_name, event_description, event_presenter, event_date,	event_time FROM wdv341_events2 WHERE event_id = $eventId";
-	
-	$result= $conn->query($sql);
-	
-	if ($result)
-	{
-		foreach($result as $row);
-	}
-?>
-
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-.error {
-	color: red;
-	font-style: italic;
-	line-height: 0;
-}
-body {
-	background-color: #FF9F1C;
-}
-#container {
-	width: 75%;
-	margin: 2% 10%;
-	border: 2px solid black;
-	text-align: center;
-	background-color: #FFC15E;
-}
-input[type=text] {
-	background-color: #ffffcc;
-}
-textarea {
-	background-color: #ffffcc;
-}
-.projectTitle {
-	text-decoration: underline;
-}
-</style>
-</head>
-<body>
-
-<div id="container">
-
-<h1>Displaying Event <?php echo $eventId ?></h1>
-
-<form name="form1" method="post" action="updateEventForm.php?id=<?php echo$eventId?>">
-<p>Event Name:<br> <span class="error"><?php echo $eventNameError?></span><input type="text" name="eventName" id="eventName" value="<?php echo $row["event_name"]?>"></p>
-
-<p>Event Description:<br><span class="error"><?php echo $eventDescriptionError?></span><textarea name="eventDescription" id="eventDescription" rows="8" cols="50"><?php echo $row["event_description"]?></textarea></p>
-
-
-<p>Event Presenter:<br><span class="error"><?php echo $eventPresenterError?></span><input type="text" name="eventPresenter" id="eventPresenter" value="<?php echo $row["event_presenter"]?>"></p>
-
-<p>Event Date (mm/dd/yyyy):<br><span class="error"><?php echo $eventDateError?></span><input type="text" name="eventDate" id="eventDate" value="<?php echo $row["event_date"]?>"></p>
-
-<p>Event Start Time (hh:mm am/pm):<br><span class="error"><?php echo $eventTimeError?></span><input type="text" name="eventTime" id="eventTime" value="<?php echo $row["event_time"]?>"></p>
-
-<p><input type="submit" name="submit" value="Submit Information">
-	<input type="reset" name="reset" value="Reset Information"></p>
-	
-</form>
-
-<p><a href="selectEvents.php">View All Events</a></p>
-
-
-</div>
-</body>
-</html>
-<?php
-}
-?>
